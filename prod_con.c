@@ -47,14 +47,14 @@ void produce(int count, int req_no, int *queue , pthread_mutex_t *queue_lock){
 	for(i = 0 ; i < QUEUE_SIZE ; i++){
 		pthread_mutex_lock(&queue_lock[i]);
 		if(queue[i] == -1){
+			printf("%s sema_val = %d req_no = %d\n", __func__, count, req_no);
 			queue[i] = req_no; 
 			pthread_mutex_unlock(&queue_lock[i]);
 			break;
 		}
 		pthread_mutex_unlock(&queue_lock[i]);
 	}
-//	assert(i < QUEUE_SIZE);
-	printf("%s sema_val = %d req_no = %d\n", __func__, count, req_no);
+	assert(i< QUEUE_SIZE);
 }
 
 void consume(int count, int *queue, pthread_mutex_t *queue_lock){
@@ -69,6 +69,7 @@ void consume(int count, int *queue, pthread_mutex_t *queue_lock){
 		}
 		pthread_mutex_unlock(&queue_lock[i]);
 	}
+	printf("consumer Count = %d\n", count);
 	//assert(0);
 }
 
@@ -111,7 +112,7 @@ static void * con(void *arg)
 		
 		/* Try to get exclusive access to count */
 		pthread_mutex_lock(c->mutex_count);
-		while(*(c->count) == QUEUE_SIZE){	
+		while(*(c->count) >= QUEUE_SIZE){	
 			pthread_cond_wait(c->cv_consumer, c->mutex_count);
 		}	
 	
@@ -178,6 +179,7 @@ int main()
 	for(i=0; i < NUM_PTHREADS ; i++)
 		pthread_join(thread_p[i], &res);
 
+	printf("Producer Thread Returned\n");
 
 	for(i=0; i < NUM_CTHREADS ; i++)
 		pthread_join(thread_c[i], &res);
