@@ -17,7 +17,7 @@
 #define QUEUE_SIZE 10 
 #define NUM_PTHREADS 1 
 #define NUM_CTHREADS 5
-#define CONCURRENT_OPS QUEUE_SIZE 
+#define CONCURRENT_OPS NUM_CTHREADS 
 
 
 int req_no = 0;
@@ -112,7 +112,7 @@ static void * con(void *arg)
 		
 		/* Try to get exclusive access to count */
 		pthread_mutex_lock(c->mutex_count);
-		while(*(c->count) >= QUEUE_SIZE){	
+		while(*(c->count) >= CONCURRENT_OPS){	
 			pthread_cond_wait(c->cv_consumer, c->mutex_count);
 		}	
 	
@@ -142,7 +142,7 @@ int main()
 	void *res;
 
 
-	int i, count = QUEUE_SIZE;
+	int i, count = CONCURRENT_OPS;
 
 	pthread_attr_init(&attr);
 	pthread_mutex_init(&mutex_count, NULL);
